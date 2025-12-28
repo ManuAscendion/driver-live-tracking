@@ -3,7 +3,7 @@ import { ref, onValue, set, remove }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 /* 🔒 Always generate Vercel links */
-const BASE_URL = "https://multi-live-location.vercel.app";
+const BASE_URL = "https://driver-live-tracking.vercel.app";
 
 /* Convert driver name → URL-safe ID */
 function makeSlug(text) {
@@ -113,3 +113,4 @@ onValue(ref(db), (snapshot) => {
     }
   });
 });
+
