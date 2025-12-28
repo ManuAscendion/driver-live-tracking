@@ -2,11 +2,8 @@ import { db } from "./firebase.js";
 import { ref, onValue, set, remove }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-/* 🔒 ALWAYS USE PRODUCTION URL */
+/* 🔒 Always generate Vercel links */
 const BASE_URL = "https://multi-live-location.vercel.app";
-
-/* 🎯 STREET-LEVEL ZOOM */
-const STREET_ZOOM = 18;
 
 /* Convert driver name → URL-safe ID */
 function makeSlug(text) {
@@ -17,19 +14,14 @@ function makeSlug(text) {
     .replace(/[^a-z0-9-]/g, "");
 }
 
-/* ---- MAP INIT ---- */
+// ---- MAP ----
 const map = L.map("map").setView([20.5937, 78.9629], 5);
-
-/* Better street-detail tiles */
-L.tileLayer(
-  "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-  { maxZoom: 19 }
-).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
 const tripsDiv = document.getElementById("trips");
 const markers = {};
 
-/* ---- ADD TRIP ---- */
+// ---- ADD TRIP ----
 window.addTrip = function () {
   const driverName = prompt("Driver Name");
   const leaderName = prompt("Leader Name");
@@ -45,13 +37,13 @@ window.addTrip = function () {
   });
 };
 
-/* ---- COPY LINK ---- */
+// ---- COPY LINK ----
 window.copyLink = function (link) {
   navigator.clipboard.writeText(link);
   alert("Link copied. Send it to the driver.");
 };
 
-/* ---- END TRIP ---- */
+// ---- END TRIP ----
 window.endTrip = function (driverId) {
   set(ref(db, "trips/" + driverId + "/status"), "ended");
 
@@ -61,7 +53,7 @@ window.endTrip = function (driverId) {
   }
 };
 
-/* ---- DELETE TRIP ---- */
+// ---- DELETE TRIP ----
 window.deleteTrip = function (driverId) {
   if (!confirm("Delete this trip permanently?")) return;
 
@@ -74,7 +66,7 @@ window.deleteTrip = function (driverId) {
   }
 };
 
-/* ---- REAL-TIME LISTENER ---- */
+// ---- LISTEN ----
 onValue(ref(db), (snapshot) => {
   const data = snapshot.val() || {};
   const trips = data.trips || {};
@@ -91,44 +83,37 @@ onValue(ref(db), (snapshot) => {
     const div = document.createElement("div");
     div.className = "trip" + (isEnded ? " ended" : "");
     div.innerHTML = `
-      <b>${trip.driverName}</b><br/>
-      Leader: ${trip.leaderName}<br/>
-      Status: ${trip.status}<br/>
+      <div class="trip-info">
+        <b>${trip.driverName}</b>
+        <span>Leader: ${trip.leaderName}</span>
+        <span>Status: ${trip.status}</span>
+      </div>
       <div class="link">${link}</div>
-      <button onclick="copyLink('${link}')">📋 Copy</button>
-      ${
-        isEnded
-          ? ""
-          : `<button onclick="endTrip('${driverId}')">🛑 End</button>`
-      }
-      <button onclick="deleteTrip('${driverId}')">🗑️ Delete</button>
+      <div class="trip-actions">
+        <button onclick="copyLink('${link}')">📋 Copy</button>
+        ${
+          isEnded
+            ? ""
+            : `<button onclick="endTrip('${driverId}')">🛑 End Trip</button>`
+        }
+        <button onclick="deleteTrip('${driverId}')">🗑️ Delete</button>
+      </div>
     `;
 
-    /* Click trip → street-level zoom */
     div.onclick = () => {
       if (markers[driverId]) {
-        map.flyTo(markers[driverId].getLatLng(), STREET_ZOOM, {
-          animate: true,
-          duration: 1.2
-        });
+        map.setView(markers[driverId].getLatLng(), 18);
       }
     };
 
     tripsDiv.appendChild(div);
 
-    /* Marker logic + auto-follow */
     if (!isEnded && loc) {
       if (!markers[driverId]) {
         markers[driverId] = L.marker([loc.lat, loc.lng]).addTo(map);
       } else {
         markers[driverId].setLatLng([loc.lat, loc.lng]);
       }
-
-      /* Smooth auto-follow for active trip */
-      map.flyTo([loc.lat, loc.lng], STREET_ZOOM, {
-        animate: true,
-        duration: 0.8
-      });
     }
   });
 });
