@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Trips Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      font-family: Arial, sans-serif;
+    }
+    #left {
+      width: 360px;
+      padding: 12px;
+      border-right: 1px solid #ddd;
+    }
+    .trip {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .ended {
+      opacity: 0.6;
+      background: #f3f3f3;
+    }
+    .link {
+      font-size: 12px;
+      word-break: break-all;
+      color: #0a58ca;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 6px;
+      margin-right: 6px;
+      padding: 6px 10px;
+    }
+    #map {
+      flex: 1;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+<div id="left">
+  <button onclick="addTrip()">➕ Add Trip</button>
+  <div id="trips"></div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="./js/viewer.js"></script>
+</body>
+</html>
