@@ -3,18 +3,15 @@
 <head>
   <title>Live Trips Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
   <style>
     :root {
       --black: #000000;
       --white: #ffffff;
-      --teal: #00FAC2;
-      --dark-teal: #008F66;
-      --yellow: #FFC000;
       --purple: #6666CC;
-      --pink: #CC0066;
-      --light-grey: #BFB9B5;
       --dark-grey: #71758A;
     }
 
@@ -31,7 +28,6 @@
 
     #left {
       width: 400px;
-      padding: 0;
       border-right: 2px solid #e8e8e8;
       display: flex;
       flex-direction: column;
@@ -42,36 +38,38 @@
     .header {
       padding: 24px 20px;
       border-bottom: 1px solid #e8e8e8;
-      background: var(--white);
-    }
-
-    .logo {
-      height: 75px;
-      width: auto;
-      object-fit: contain;
-      margin-bottom: 16px;
-      display: block;
     }
 
     .header-title {
       font-size: 20px;
       font-weight: 700;
       color: var(--black);
-      margin-bottom: 6px;
-      line-height: 1.2;
     }
 
     .header-subtitle {
       font-size: 14px;
       color: var(--dark-grey);
-      font-weight: 500;
-      line-height: 1.4;
+      margin-top: 6px;
     }
 
     .controls {
       padding: 20px;
-      background: #fafafa;
       border-bottom: 1px solid #e8e8e8;
+      background: #fafafa;
+    }
+
+    .search-box {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
     }
 
     .trips-container {
@@ -85,102 +83,26 @@
       border: 2px solid #e0e0e0;
       padding: 18px;
       margin-bottom: 12px;
-      cursor: pointer;
       border-radius: 12px;
       background: var(--white);
+      cursor: pointer;
       transition: all 0.25s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
-    .trip-info {
-      margin-bottom: 4px;
-      line-height: 1.6;
+    .trip:hover {
+      border-color: var(--purple);
     }
 
     .trip-info b {
       font-size: 16px;
       font-weight: 700;
-      color: var(--black);
     }
 
     .trip-info span {
+      display: block;
       font-size: 14px;
       color: var(--dark-grey);
-      display: block;
       margin-top: 2px;
-    }
-
-    .trip-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .trip-actions button {
-      flex: 1;
-      min-width: 80px;
-      margin: 0;
-      padding: 8px 12px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .trip:hover {
-      border-color: var(--purple);
-      box-shadow: 0 4px 12px rgba(102, 102, 204, 0.12);
-      transform: translateY(-1px);
-    }
-
-    .ended {
-      opacity: 0.55;
-      background: #f5f5f5;
-      border-color: #d0d0d0;
-    }
-
-    .ended:hover {
-      border-color: var(--dark-grey);
-      transform: translateY(-1px);
-    }
-
-    .link {
-      font-size: 11px;
-      word-break: break-all;
-      color: var(--purple);
-      margin-top: 10px;
-      margin-bottom: 2px;
-      font-weight: 500;
-      display: block;
-      line-height: 1.4;
-      opacity: 0.85;
-    }
-
-    button {
-      margin-top: 0;
-      margin-right: 6px;
-      padding: 11px 20px;
-      border: 2px solid var(--purple);
-      border-radius: 10px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      background: var(--white);
-      color: var(--purple);
-      box-shadow: 0 2px 6px rgba(102, 102, 204, 0.15);
-    }
-
-    button:hover {
-      background: var(--purple);
-      color: var(--white);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 102, 204, 0.25);
-    }
-
-    button:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(102, 102, 204, 0.15);
     }
 
     #map {
@@ -188,41 +110,56 @@
       height: 100vh;
     }
 
-    .trips-container::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .trips-container::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .trips-container::-webkit-scrollbar-thumb {
-      background: #d0d0d0;
+    button {
+      padding: 8px 14px;
       border-radius: 10px;
+      border: 2px solid var(--purple);
+      background: var(--white);
+      color: var(--purple);
+      font-weight: 600;
+      cursor: pointer;
     }
 
-    .trips-container::-webkit-scrollbar-thumb:hover {
-      background: var(--dark-grey);
+    button:hover {
+      background: var(--purple);
+      color: var(--white);
     }
   </style>
 </head>
+
 <body>
-<div id="left">
-  <div class="header">
-    <img src="ascendion-logo.png" alt="ASCENDION" class="logo">
-    <div class="header-title">Live Trips Dashboard</div>
-    <div class="header-subtitle">Real-time ground transport monitoring</div>
+
+  <div id="left">
+    <div class="header">
+      <div class="header-title">Live Trips Dashboard</div>
+      <div class="header-subtitle">Real-time ground transport monitoring</div>
+    </div>
+
+    <div class="controls">
+      <button onclick="startAddTrip()">➕ Add Trip</button>
+
+      <!-- Pickup & Drop Search -->
+      <div id="searchBox" class="search-box">
+        <input id="pickupInput" placeholder="📍 Pickup location" />
+        <input id="dropInput" placeholder="🏁 Drop location" />
+
+        <button style="width:100%" onclick="confirmTrip()">✅ Create Trip</button>
+      </div>
+    </div>
+
+    <div class="trips-container">
+      <div id="trips"></div>
+    </div>
   </div>
-  <div class="controls">
-    <button onclick="addTrip()">➕ Add Trip</button>
-  </div>
-  <div class="trips-container">
-    <div id="trips"></div>
-  </div>
-</div>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./js/viewer.js"></script>
+
+  <div id="map"></div>
+
+  <!-- IMPORTANT: places library added -->
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjpGN4ickxPdE7kqmapEm65d-tnH4iLrQ&libraries=places">
+  </script>
+
+  <script type="module" src="/js/viewer.js"></script>
+
 </body>
 </html>
-
