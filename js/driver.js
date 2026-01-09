@@ -14,21 +14,37 @@ if (!DRIVER_ID) {
 
 driverIdText.innerText = `Driver ID: ${DRIVER_ID}`;
 
-navigator.geolocation.watchPosition(
-  (position) => {
-    set(ref(db, "locations/" + DRIVER_ID), {
-      lat: position.coords.latitude,
-      lng: position.coords.longitude,
-      timestamp: Date.now()
-    });
+function sendLocation() {
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const payload = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        timestamp: Date.now(),
+      };
 
-    statusDiv.innerText =
-      "Location sent ✔️\n" +
-      position.coords.latitude.toFixed(5) + ", " +
-      position.coords.longitude.toFixed(5);
-  },
-  () => {
-    statusDiv.innerText = "Location permission denied ❌";
-  },
-  { enableHighAccuracy: true }
-);
+      // ✅ THIS IS THE CRITICAL WRITE
+      set(ref(db, "locations/" + DRIVER_ID), payload);
+
+      statusDiv.innerText =
+        "Location sent ✔️\n" +
+        payload.lat.toFixed(5) + ", " +
+        payload.lng.toFixed(5);
+    },
+    (err) => {
+      statusDiv.innerText = "❌ Location error";
+      console.error("GPS error:", err);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0,
+    }
+  );
+}
+
+/* 🚀 Send immediately */
+sendLocation();
+
+/* 🔁 Keep sending every 5 seconds */
+setInterval(sendLocation, 5000);
